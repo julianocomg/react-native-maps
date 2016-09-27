@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react';
 import {
   View,
+  requireNativeComponent,
   StyleSheet,
   Platform,
   NativeModules,
@@ -9,13 +10,9 @@ import {
 } from 'react-native';
 
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
-import decorateMapComponent, {
-  SUPPORTED,
-  USES_DEFAULT_IMPLEMENTATION,
-} from './decorateMapComponent';
 
 const viewConfig = {
-  uiViewClassName: 'AIR<provider>MapMarker',
+  uiViewClassName: 'AIRMapMarker',
   validAttributes: {
     coordinate: true,
   },
@@ -229,13 +226,16 @@ class MapMarker extends React.Component {
       case 'android':
         NativeModules.UIManager.dispatchViewManagerCommand(
           this._getHandle(),
-          this.getUIManagerCommand(name),
+          NativeModules.UIManager.AIRMapMarker.Commands[name],
           args
         );
         break;
 
       case 'ios':
-        this.getMapManagerCommand(name)(this._getHandle(), ...args);
+        NativeModules.AIRMapMarkerManager[name].apply(
+          NativeModules.AIRMapMarkerManager[name],
+          [this._getHandle(), ...args]
+        );
         break;
 
       default:
@@ -244,13 +244,11 @@ class MapMarker extends React.Component {
   }
 
   render() {
-    let image;
-    if (this.props.image) {
-      image = resolveAssetSource(this.props.image) || {};
-      image = image.uri;
-    }
+    let image = this.props.image
 
-    const AIRMapMarker = this.getAirComponent();
+    if (image && typeof image.uri === 'object') {
+      image.uri = image.uri.uri
+    }
 
     return (
       <AIRMapMarker
@@ -274,14 +272,8 @@ const styles = StyleSheet.create({
   },
 });
 
+const AIRMapMarker = requireNativeComponent('AIRMapMarker', MapMarker);
+
 MapMarker.Animated = Animated.createAnimatedComponent(MapMarker);
 
-module.exports = decorateMapComponent(MapMarker, {
-  componentType: 'Marker',
-  providers: {
-    google: {
-      ios: SUPPORTED,
-      android: USES_DEFAULT_IMPLEMENTATION,
-    },
-  },
-});
+module.exports = MapMarker;

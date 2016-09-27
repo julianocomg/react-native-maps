@@ -19,8 +19,8 @@ import javax.annotation.Nullable;
 
 public class AirMapMarkerManager extends ViewGroupManager<AirMapMarker> {
 
-    private static final int SHOW_INFO_WINDOW = 1;
-    private static final int HIDE_INFO_WINDOW = 2;
+    public static final int SHOW_INFO_WINDOW = 1;
+    public static final int HIDE_INFO_WINDOW = 2;
 
     public AirMapMarkerManager() {
     }
@@ -86,8 +86,12 @@ public class AirMapMarkerManager extends ViewGroupManager<AirMapMarker> {
     }
 
     @ReactProp(name = "image")
-    public void setImage(AirMapMarker view, @Nullable String source) {
-        view.setImage(source);
+    public void setImage(AirMapMarker view, @Nullable ReadableMap image) {
+        String uri = image != null && image.hasKey("uri") ? image.getString("uri") : null;
+        int width = image != null && image.hasKey("width") ? image.getInt("width") : 0;
+        int height = image != null && image.hasKey("height") ? image.getInt("height") : 0;
+
+        view.setImage(uri, width, height);
     }
 //    public void setImage(AirMapMarker view, ReadableMap image) {
 //        view.setImage(image);
@@ -159,7 +163,7 @@ public class AirMapMarkerManager extends ViewGroupManager<AirMapMarker> {
     @Override
     @Nullable
     public Map getExportedCustomDirectEventTypeConstants() {
-        Map<String, Map<String, String>> map = MapBuilder.of(
+        Map map = MapBuilder.of(
                 "onPress", MapBuilder.of("registrationName", "onPress"),
                 "onCalloutPress", MapBuilder.of("registrationName", "onCalloutPress"),
                 "onDragStart", MapBuilder.of("registrationName", "onDragStart"),

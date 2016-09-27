@@ -2,6 +2,7 @@ package com.airbnb.android.react.maps;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Animatable;
 import android.net.Uri;
@@ -198,7 +199,7 @@ public class AirMapMarker extends AirMapFeature {
         update();
     }
 
-    public void setImage(String uri) {
+    public void setImage(String uri, int width, int height) {
         if (uri == null) {
             iconBitmapDescriptor = null;
             update();
@@ -217,7 +218,15 @@ public class AirMapMarker extends AirMapFeature {
                     .build();
             logoHolder.setController(controller);
         } else {
-            iconBitmapDescriptor = getBitmapDescriptorByName(uri);
+            if (width == 0 || height == 0) {
+                iconBitmapDescriptor = getBitmapDescriptorByName(uri);
+            } else {
+                Bitmap image = BitmapFactory.decodeResource(getResources(), getDrawableResourceByName(uri));
+
+                iconBitmapDescriptor = BitmapDescriptorFactory.fromBitmap(
+                    Bitmap.createScaledBitmap(image, width, height, true)
+                );
+            }
             update();
         }
     }
