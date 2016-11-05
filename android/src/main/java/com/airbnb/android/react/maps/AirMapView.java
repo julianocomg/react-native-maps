@@ -153,15 +153,6 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
         this.map.setInfoWindowAdapter(this);
         this.map.setOnMarkerDragListener(this);
 
-        int density = (int) getResources().getDisplayMetrics().density;
-
-        int left = 0;
-        int top = 20 * density;
-        int right = 0;
-        int bottom = 113 * density;
-
-        map.setPadding(left, top, right, bottom);
-
         manager.pushEvent(this, "onMapReady", new WritableNativeMap());
 
         final AirMapView view = this;
