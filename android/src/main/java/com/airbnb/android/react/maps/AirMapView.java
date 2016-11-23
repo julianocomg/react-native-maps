@@ -516,26 +516,30 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
     }
 
     public void fitToElements(boolean animated, double zoom, int padding) {
-        int density = (int) getResources().getDisplayMetrics().density;
+        try {
+            int density = (int) getResources().getDisplayMetrics().density;
 
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        for (AirMapFeature feature : features) {
-            if (feature instanceof AirMapMarker) {
-                Marker marker = (Marker)feature.getFeature();
-                builder.include(marker.getPosition());
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            for (AirMapFeature feature : features) {
+                if (feature instanceof AirMapMarker) {
+                    Marker marker = (Marker)feature.getFeature();
+                    builder.include(marker.getPosition());
+                }
+                // TODO(lmr): may want to include shapes / etc.
             }
-            // TODO(lmr): may want to include shapes / etc.
-        }
-        LatLngBounds bounds = builder.build();
+            LatLngBounds bounds = builder.build();
 
-        bounds = (adjustBoundsForMaxZoomLevel(bounds, zoom));
+            bounds = (adjustBoundsForMaxZoomLevel(bounds, zoom));
 
-        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding * density);
-        if (animated) {
-            startMonitoringRegion();
-            map.animateCamera(cu);
-        } else {
-            map.moveCamera(cu);
+            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding * density);
+            if (animated) {
+                startMonitoringRegion();
+                map.animateCamera(cu);
+            } else {
+                map.moveCamera(cu);
+            }
+        } catch (java.lang.IllegalStateException e) {
+            return;
         }
     }
 
